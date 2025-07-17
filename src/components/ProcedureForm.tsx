@@ -15,44 +15,18 @@ import { ProcedureFormOCRSection } from '@/components/procedures/ProcedureFormOC
 import { DynamicFieldList } from '@/components/procedure-form/DynamicFieldList';
 import { DocumentField } from '@/components/procedure-form/DocumentField';
 import { FileUploadField } from '@/components/procedure-form/FileUploadField';
+import { useNomenclatureData } from '@/hooks/useNomenclatureData';
 
 interface ProcedureFormProps {
   onClose: () => void;
   onSubmit: (data: any) => void;
 }
 
-// Nomenclature data - these would normally come from a database
-const CATEGORIES = [
-  'Urbanisme',
-  'État civil',
-  'Fiscalité',
-  'Commerce',
-  'Social',
-  'Santé',
-  'Éducation',
-  'Transport',
-  'Environnement',
-  'Agriculture'
-];
-
-const ORGANIZATIONS = [
-  'Ministère de l\'Intérieur',
-  'Ministère des Finances',
-  'Ministère de la Justice',
-  'Ministère de la Santé',
-  'Ministère de l\'Éducation',
-  'Ministère du Commerce',
-  'Ministère de l\'Agriculture',
-  'Ministère des Transports',
-  'Wilaya',
-  'Commune',
-  'Direction des Impôts',
-  'Tribunal',
-  'Office National des Statistiques'
-];
+// Ces données seront maintenant récupérées via useNomenclatureData
 
 export function ProcedureForm({ onClose, onSubmit }: ProcedureFormProps) {
   const { toast } = useToast();
+  const { nomenclatureData, mapOCRDataToForm } = useNomenclatureData();
   const [inputMethod, setInputMethod] = useState<'manual' | 'ocr'>('manual');
   const [showOCRScanner, setShowOCRScanner] = useState(false);
 
@@ -134,7 +108,7 @@ export function ProcedureForm({ onClose, onSubmit }: ProcedureFormProps) {
     console.log('📋 [ProcedureForm] Nombre de champs reçus:', Object.keys(data.formData).length);
     
     // Mapper TOUS les champs OCR vers le formulaire de procédure
-    const mappedData: any = {};
+    const mappedData: any = mapOCRDataToForm(data.formData, 'procedure');
     
     // Informations de base
     if (data.formData.name || data.formData.nom_procedure) {
@@ -368,8 +342,8 @@ export function ProcedureForm({ onClose, onSubmit }: ProcedureFormProps) {
                         <SelectValue placeholder="Sélectionner une catégorie" />
                       </SelectTrigger>
                       <SelectContent>
-                        {CATEGORIES.map((category) => (
-                          <SelectItem key={category} value={category}>{category}</SelectItem>
+                        {nomenclatureData?.procedureCategories.map((category) => (
+                          <SelectItem key={category.code} value={category.name}>{category.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -397,8 +371,8 @@ export function ProcedureForm({ onClose, onSubmit }: ProcedureFormProps) {
                         <SelectValue placeholder="Sélectionner une organisation" />
                       </SelectTrigger>
                       <SelectContent>
-                        {ORGANIZATIONS.map((org) => (
-                          <SelectItem key={org} value={org}>{org}</SelectItem>
+                        {nomenclatureData?.organizations.map((org) => (
+                          <SelectItem key={org.code} value={org.name}>{org.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

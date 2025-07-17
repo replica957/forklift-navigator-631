@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { FileText, Save, ArrowLeft, Wand2 } from 'lucide-react';
 import { getLegalTextTemplate, ALL_LEGAL_TEXT_TEMPLATES } from '@/data/legalTextTemplates';
 import { LegalTextDynamicFieldRenderer } from './legal/LegalTextDynamicFieldRenderer';
+import { useNomenclatureData } from '@/hooks/useNomenclatureData';
 
 interface LegalTextFormEnhancedProps {
   onClose: () => void;
@@ -26,6 +27,7 @@ export function LegalTextFormEnhanced({
   initialInputMethod = 'manual'
 }: LegalTextFormEnhancedProps) {
   const { toast } = useToast();
+  const { nomenclatureData, mapOCRDataToForm } = useNomenclatureData();
   const [inputMethod, setInputMethod] = useState<'manual' | 'ocr'>(initialInputMethod);
   const [showOCRScanner, setShowOCRScanner] = useState(false);
   const [selectedTextType, setSelectedTextType] = useState<string>('');
@@ -36,7 +38,7 @@ export function LegalTextFormEnhanced({
     console.log('📋 [LegalTextForm] Nombre de champs reçus:', Object.keys(data.formData).length);
     
     // Mapper et distribuer TOUS les champs OCR vers le formulaire de texte juridique
-    const mappedData: any = { ...data.formData };
+    const mappedData: any = mapOCRDataToForm(data.formData, 'legal');
     
     // Mapper les champs spécifiques selon le type de document détecté
     const content = (data.formData.contenu || data.formData.content || '').toLowerCase();

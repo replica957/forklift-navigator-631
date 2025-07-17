@@ -43,10 +43,12 @@ export function FormLibrary({ onSelectTemplate, onAddToLegalTexts, onAddToProced
     if (selectedCategory && selectedCategory !== 'all') {
       if (selectedCategory === 'textes_juridiques') {
         // Filtrer tous les textes juridiques (excluant les procédures administratives)
-        matchesCategory = template.type !== 'Procédure Administrative';
+        const procedureCategories = ['État Civil', 'Urbanisme', 'Commerce', 'Emploi', 'Santé', 'Éducation', 'Transport', 'Fiscalité'];
+        matchesCategory = !procedureCategories.includes(template.category);
       } else if (selectedCategory === 'procedures_administratives') {
         // Filtrer uniquement les procédures administratives
-        matchesCategory = template.type === 'Procédure Administrative';
+        const procedureCategories = ['État Civil', 'Urbanisme', 'Commerce', 'Emploi', 'Santé', 'Éducation', 'Transport', 'Fiscalité'];
+        matchesCategory = procedureCategories.includes(template.category);
       } else {
         // Filtrer par catégorie exacte
         matchesCategory = template.category === selectedCategory;
