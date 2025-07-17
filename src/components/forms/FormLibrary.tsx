@@ -25,12 +25,34 @@ export function FormLibrary({ onSelectTemplate, onAddToLegalTexts, onAddToProced
   const itemsPerPage = 10;
   const { toast } = useToast();
 
-  const categories = Array.from(new Set(ALL_FORM_TEMPLATES.map(t => t.category)));
+  // Catégories prédéfinies avec filtres spéciaux
+  const predefinedCategories = [
+    { value: 'all', label: 'Toutes les catégories' },
+    { value: 'textes_juridiques', label: 'Textes Juridiques' },
+    { value: 'procedures_administratives', label: 'Procédures Administratives' }
+  ];
+
+  const dynamicCategories = Array.from(new Set(ALL_FORM_TEMPLATES.map(t => t.category)))
+    .filter(cat => !['État Civil', 'Urbanisme', 'Commerce', 'Emploi', 'Santé', 'Éducation', 'Transport', 'Fiscalité'].includes(cat));
 
   const filteredTemplates = ALL_FORM_TEMPLATES.filter(template => {
     const matchesSearch = template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          template.type.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !selectedCategory || selectedCategory === 'all' || template.category === selectedCategory;
+    
+    let matchesCategory = true;
+    if (selectedCategory && selectedCategory !== 'all') {
+      if (selectedCategory === 'textes_juridiques') {
+        // Filtrer tous les textes juridiques (excluant les procédures administratives)
+        matchesCategory = template.type !== 'Procédure Administrative';
+      } else if (selectedCategory === 'procedures_administratives') {
+        // Filtrer uniquement les procédures administratives
+        matchesCategory = template.type === 'Procédure Administrative';
+      } else {
+        // Filtrer par catégorie exacte
+        matchesCategory = template.category === selectedCategory;
+      }
+    }
+    
     return matchesSearch && matchesCategory;
   });
 
@@ -115,8 +137,11 @@ export function FormLibrary({ onSelectTemplate, onAddToLegalTexts, onAddToProced
             <SelectValue placeholder="Toutes les catégories" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Toutes les catégories</SelectItem>
-            {categories.map(category => (
+            {predefinedCategories.map(category => (
+              <SelectItem key={category.value} value={category.value}>{category.label}</SelectItem>
+            ))}
+            {dynamicCategories.length > 0 && <div className="border-t my-2" />}
+            {dynamicCategories.map(category => (
               <SelectItem key={category} value={category}>{category}</SelectItem>
             ))}
           </SelectContent>
